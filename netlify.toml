@@ -1,0 +1,57 @@
+# =================================================================
+#          CONFIGURATION NETLIFY POUR HUB ENVIRONNEMENT
+# =================================================================
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  
+  # IMPORTANT : Indique au scanner de secrets de Netlify d'ignorer ces clés.
+  # La valeur doit être une chaîne de caractères unique avec les clés séparées par une virgule.
+  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_ANON_KEY,VITE_SUPABASE_URL"
+
+
+# Redirection "catch-all" pour les Single-Page Applications (SPA).
+# Netlify sert automatiquement les fichiers statiques avant d'appliquer cette redirection
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# =================================================================
+# POLITIQUE DE SÉCURITÉ DE CONTENU (CSP) ET EN-TÊTES DE SÉCURITÉ
+# =================================================================
+# Ces en-têtes renforcent la sécurité de l'application en production
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Protection contre le clickjacking
+    X-Frame-Options = "DENY"
+    
+    # Protection XSS (déprécié mais toujours supporté)
+    X-XSS-Protection = "1; mode=block"
+    
+    # Empêcher le MIME type sniffing
+    X-Content-Type-Options = "nosniff"
+    
+    # Politique de référent
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Politique de permissions (géolocalisation autorisée pour l'app)
+    Permissions-Policy = "geolocation=(self), microphone=(), camera=(), payment=(), usb=(), bluetooth=(), magnetometer=(), gyroscope=(), accelerometer=()"
+    
+    # HSTS (HTTP Strict Transport Security) - Force HTTPS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    
+    # Content Security Policy - Politique stricte de sécurité
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.supabase.co https://i.imgur.com https://cdnjs.cloudflare.com https://*.tile.openstreetmap.org https://unpkg.com https://*.basemaps.cartocdn.com https://staticmap.openstreetmap.de https://api-adresse.data.gouv.fr https://raw.githubusercontent.com; connect-src 'self' https://rxdszxaanzwgxwxfmrws.supabase.co https://*.supabase.co https://overpass-api.de https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api-adresse.data.gouv.fr https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
+    
+    # Protection contre les attaques de type XSS et injection
+    X-DNS-Prefetch-Control = "on"
+    
+    # Désactiver la mise en cache pour les pages sensibles (peut être surchargé par des règles spécifiques)
+    Cache-Control = "no-cache, no-store, must-revalidate"

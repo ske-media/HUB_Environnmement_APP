@@ -1,0 +1,209 @@
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { FileText, Droplets, Wind, Beaker, Waves, Activity, LineChart, ArrowLeft, GlassWater, Layers, Shovel, Shield, Radiation, MapPin, Package, TreePine, Building2 } from 'lucide-react';
+import { isDevelopmentSurvey } from '../lib/developmentSurveys';
+import { ENABLED_SURVEY_TYPES } from '../lib/surveyTypes';
+import { cn } from '../lib/utils';
+
+const SURVEY_TYPES = [
+  {
+    id: 'soil',
+    name: 'Sols',
+    description: 'Études des sols et sous-sols',
+    icon: FileText,
+    path: 'soil',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'groundwater',
+    name: 'Eaux souterraines',
+    description: 'Analyses des nappes phréatiques',
+    icon: Droplets,
+    path: 'groundwater',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'ambient_air',
+    name: 'Air ambiant',
+    description: 'Qualité de l\'air environnant',
+    icon: Wind,
+    path: 'ambient_air',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'gas',
+    name: 'Gaz du sol',
+    description: 'Mesures des émissions gazeuses',
+    icon: Beaker,
+    path: 'gas',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'surface_water',
+    name: 'Eaux superficielles',
+    description: 'Analyses des eaux de surface',
+    icon: Waves,
+    path: 'surface_water',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'pid',
+    name: 'Campagne PID',
+    description: 'Mesures PID',
+    icon: Activity,
+    path: 'pid',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'piezometric',
+    name: 'Fiche piézométrique',
+    description: 'Relevés piézométriques',
+    icon: LineChart,
+    path: 'piezometric',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'tap_water',
+    name: 'Eaux du Robinet',
+    description: 'Prélèvement des eaux du robinet',
+    icon: GlassWater,
+    path: 'tap_water',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'sediment',
+    name: 'Sédiments',
+    description: 'Prélèvement des sédiments',
+    icon: Layers,
+    path: 'sediment',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'excavation',
+    name: 'Suivi de Fouille',
+    description: 'Prélèvement bords et fonds de fouille',
+    icon: Shovel,
+    path: 'excavation',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'risk_analysis',
+    name: 'Analyse des Risques',
+    description: 'Analyse des risques préalables',
+    icon: Shield,
+    path: 'risk_analysis',
+    category: 'Document de Projet & Sécurité'
+  },
+  {
+    id: 'radon_soil',
+    name: 'Radon Sol',
+    description: 'Mesure du radon dans le sol',
+    icon: Radiation,
+    path: 'radon_soil',
+    category: 'Sondage de Terrain'
+  },
+  {
+    id: 'site_visit',
+    name: 'Questionnaire Visite de Site',
+    description: 'Audit et observation de site',
+    icon: MapPin,
+    path: 'site_visit',
+    category: 'Document de Projet & Sécurité'
+  },
+  {
+    id: 'equipment_tracking',
+    name: 'Suivi Matériel',
+    description: 'Logistique interne par chantier',
+    icon: Package,
+    path: 'equipment_tracking',
+    category: 'Document de Projet & Sécurité'
+  },
+  {
+    id: 'garden_questionnaire',
+    name: 'Questionnaire Jardin',
+    description: 'Évaluation usage et risques jardin résidentiel',
+    icon: TreePine,
+    path: 'garden_questionnaire',
+    category: 'Document de Projet & Sécurité'
+  },
+  {
+    id: 'icpe_visit',
+    name: 'Visite ICPE',
+    description: 'Questionnaire de visite ICPE - Audit conformité environnementale',
+    icon: Building2,
+    path: 'icpe_visit',
+    category: 'Document de Projet & Sécurité'
+  }
+] as const;
+
+export function NewSurvey() {
+  const navigate = useNavigate();
+  const { siteId } = useParams();
+
+  const handleSelectType = (path: string) => {
+    navigate(`/sites/${siteId}/surveys/${path}/new`);
+  };
+
+  // Grouper les types de sondages par catégorie (uniquement les types autorisés)
+  const groupedTypes = SURVEY_TYPES
+    .filter(type => ENABLED_SURVEY_TYPES.includes(type.id as any))
+    .reduce((acc, type) => {
+      if (!acc[type.category]) {
+        acc[type.category] = [];
+      }
+      acc[type.category].push(type);
+      return acc;
+    }, {} as Record<string, Array<typeof SURVEY_TYPES[number]>>);
+
+  return (
+    <div className="w-full lg:max-w-6xl lg:mx-auto">
+      <div className="flex items-center mb-6">
+        <Link
+          to={`/sites/${siteId}`}
+          className="mr-4 p-2 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          aria-label="Retour"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </Link>
+        <h1 className="text-2xl font-bold text-foreground">Nouvelle Fiche</h1>
+      </div>
+      
+      <div className="space-y-8">
+        {Object.entries(groupedTypes).map(([category, types]) => (
+          <div key={category} className="glass-panel overflow-hidden sm:rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-foreground">{category}</h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {types.map((type) => {
+                const Icon = type.icon;
+                const isDevelopment = isDevelopmentSurvey(type.id);
+                return (
+                  <button
+                    key={type.id}
+                    onClick={() => handleSelectType(type.path)}
+                    className={cn(
+                      "relative rounded-lg border p-4 hover:border-[#34519e] hover:shadow-md transition-all duration-200 text-left",
+                      isDevelopment && "shadow-warning-glow border-warning/50"
+                    )}
+                  >
+                    {/* Halo orange pour les fiches en développement */}
+                    {isDevelopment && (
+                      <div className="absolute -inset-1 bg-warning/20 rounded-lg blur-xl opacity-50 -z-10" />
+                    )}
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <Icon className="h-6 w-6 text-[#34519e]" />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-lg font-medium text-foreground">{type.name}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{type.description}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
